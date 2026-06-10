@@ -1,0 +1,51 @@
+# ==========================
+# IntelliJ
+# ==========================
+.idea/
+*.iml
+out/
+
+# ==========================
+# macOS
+# ==========================
+.DS_Store
+
+# ==========================
+# Backend (Spring Boot)
+# ==========================
+giftntintiliapi/target/
+giftntintiliapi/.mvn/
+giftntintiliapi/logs/
+
+# Maven wrapper logs
+giftntintiliapi/.flattened-pom.xml
+
+# ==========================
+# Frontend (React/Vite)
+# ==========================
+enviro365-withdrawal-ui/node_modules/
+enviro365-withdrawal-ui/dist/
+enviro365-withdrawal-ui/.vite/
+
+# npm logs
+enviro365-withdrawal-ui/npm-debug.log*
+enviro365-withdrawal-ui/yarn-debug.log*
+enviro365-withdrawal-ui/yarn-error.log*
+
+# ==========================
+# Environment Files
+# ==========================
+.env
+.env.*
+!.env.example
+
+# ==========================
+# Coverage / Reports
+# ==========================
+coverage/
+*.lcov
+
+# ==========================
+# OS Temp Files
+# ==========================
+Thumbs.db
