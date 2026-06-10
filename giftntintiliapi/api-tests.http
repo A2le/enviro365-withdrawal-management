@@ -1,0 +1,7 @@
+POST http://localhost:8080/api/withdrawals
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "amount": 10000
+}
