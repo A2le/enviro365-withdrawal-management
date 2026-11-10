@@ -1,13 +1,63 @@
-# Enviro365 Withdrawal Management System
+# Enviro365 Withdrawal Management API
 
 ## Overview
 
 This project was developed as part of the Enviro365 Junior Developer Assessment.
 
-The solution consists of:
+The application provides a RESTful API that allows investors to view their investment portfolios and submit withdrawal requests while enforcing specific business rules.
 
-* A Spring Boot backend API responsible for portfolio management, withdrawal processing, validation, CSV export, and business rule enforcement.
-* A React frontend that allows users to view portfolios, create withdrawals, view withdrawal history, and export withdrawal statements.
+The solution is built using Spring Boot, Spring Data JPA, and an in-memory H2 database.
+
+---
+
+## Features
+
+### Portfolio Management
+
+* Retrieve an investor's portfolio
+* View investor information
+* View associated investment products
+* View product balances and product types
+
+### Withdrawal Processing
+
+* Submit withdrawal requests
+* Validate business rules before processing
+* Automatically update product balances
+* Store withdrawal history
+
+### Withdrawal History
+
+* Retrieve all withdrawal records
+* View withdrawal amounts, dates, and related products
+
+### CSV Export
+
+* Export all withdrawal records as a CSV file
+
+### Validation & Error Handling
+
+* Request validation using Jakarta Validation
+* Global exception handling
+* Standardized API error responses
+
+---
+
+## Business Rules
+
+The application enforces the following withdrawal rules:
+
+### Retirement Products
+
+Withdrawals from retirement products are only permitted when the investor is older than 65 years.
+
+### Balance Validation
+
+A withdrawal amount cannot exceed the available product balance.
+
+### Maximum Withdrawal Limit
+
+A withdrawal amount cannot exceed 90% of the product balance.
 
 ---
 
@@ -18,151 +68,222 @@ The solution consists of:
 * Java 21
 * Spring Boot 3.5.x
 * Spring Data JPA
-* H2 Database
 * Maven
 * Lombok
-* OpenAPI / Swagger
+* H2 Database
 
-### Frontend
+### Testing
 
-* React
-* Vite
-* Material UI
-* Axios
+* JUnit 5
+* Mockito
 
 ---
 
-## Repository Structure
+## Project Structure
 
 ```text
-.
-├── giftntintiliapi
-│   ├── pom.xml
-│   └── src
-│
-├── enviro365-withdrawal-ui
-│   ├── package.json
-│   └── src
-│
-├── run.sh
-└── README.md
+src/main/java/com.enviro.assessment.junior.giftntintili
+
+├── config
+├── controller
+├── dto
+├── entity
+├── exception
+├── repository
+└── service
+```
+
+### Package Responsibilities
+
+| Package    | Responsibility                             |
+| ---------- | ------------------------------------------ |
+| controller | REST API endpoints                         |
+| service    | Business logic                             |
+| repository | Database access                            |
+| entity     | JPA entities                               |
+| dto        | Request and response models                |
+| exception  | Global exception handling                  |
+| config     | Application configuration and data seeding |
+
+---
+
+## Database
+
+The application uses an in-memory H2 database.
+
+Sample data is automatically loaded on application startup using a CommandLineRunner.
+
+### Sample Investors
+
+#### John Smith
+
+* Age: 70
+* Retirement Annuity: R500,000
+* Tax Free Savings: R150,000
+
+#### Mary Johnson
+
+* Age: 45
+* Retirement Fund: R300,000
+* Money Market Savings: R80,000
+
+---
+
+## API Endpoints
+
+### Get Investor Portfolio
+
+```http
+GET /api/investors/{investorId}/portfolio
+```
+
+Example:
+
+```http
+GET /api/investors/1/portfolio
 ```
 
 ---
 
-## Features
+### Create Withdrawal
 
-### Portfolio Management
+```http
+POST /api/withdrawals
+```
 
-* View investor information
-* View investment products
-* View product balances
+Request Body:
 
-### Withdrawal Management
-
-* Create withdrawal requests
-* Apply business rule validation
-* Automatically update balances
-
-### Withdrawal History
-
-* View all withdrawals
-* Track historical remaining balances
-
-### CSV Statement Export
-
-* Export withdrawal records as CSV
-* Filter exports by investor
-
-### API Documentation
-
-Swagger/OpenAPI documentation available at:
-
-```text
-http://localhost:8080/swagger-ui.html
+```json
+{
+  "productId": 1,
+  "amount": 10000
+}
 ```
 
 ---
 
-## Business Rules
+### Get Withdrawal History
 
-### Retirement Products
-
-Withdrawals from retirement products are only allowed when the investor is older than 65 years.
-
-### Balance Validation
-
-Withdrawals cannot exceed the available balance.
-
-### Maximum Withdrawal Rule
-
-Withdrawals cannot exceed 90% of the product balance.
+```http
+GET /api/withdrawals
+```
 
 ---
 
-## Running The Application
+### Export Withdrawals
 
-### Option 1 - Using the Startup Script
+```http
+GET /api/withdrawals/export
+```
 
-From the repository root:
+Downloads:
+
+```text
+withdrawals.csv
+```
+
+---
+
+## Running the Application
+
+### Prerequisites
+
+* Java 21
+* Maven 3.9+
+
+### Clone Repository
 
 ```bash
-chmod +x run.sh
-./run.sh
+git clone <repository-url>
 ```
 
-This will:
-
-* Start the Spring Boot backend
-* Install frontend dependencies if needed
-* Start the React frontend
-
----
-
-### Option 2 - Run Individually
-
-#### Backend
+### Navigate to Project
 
 ```bash
 cd giftntintiliapi
+```
+
+### Run Application
+
+```bash
 mvn spring-boot:run
 ```
 
-#### Frontend
-
-```bash
-cd enviro365-withdrawal-ui
-npm install
-npm run dev
-```
-
----
-
-## Application URLs
-
-### Frontend
-
-```text
-http://localhost:5173
-```
-
-### Backend API
+Application starts on:
 
 ```text
 http://localhost:8080
 ```
 
-### Swagger UI
+---
 
-```text
-http://localhost:8080/swagger-ui.html
-```
+## H2 Database Console
 
-### H2 Console
+URL:
 
 ```text
 http://localhost:8080/h2-console
 ```
+
+Connection Details:
+
+```text
+JDBC URL:
+jdbc:h2:mem:envirodb
+
+Username:
+sa
+
+Password:
+(blank)
+```
+swagger url
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+---
+
+## Running Tests
+
+```bash
+mvn test
+```
+
+The test suite validates:
+
+* Retirement age restrictions
+* Balance validation
+* Maximum withdrawal limits
+* Withdrawal processing logic
+
+---
+
+## Design Decisions
+
+### Layered Architecture
+
+The application follows a layered architecture:
+
+```text
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+Database
+```
+
+This separation improves maintainability, testability, and readability.
+
+### DTO Pattern
+
+DTOs are used to separate API contracts from persistence models and prevent direct exposure of entities.
+
+### Global Exception Handling
+
+A centralized exception handling mechanism provides consistent and user-friendly error responses.
 
 ---
 
