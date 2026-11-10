@@ -11,6 +11,7 @@ import com.enviro.assessment.junior.giftntintili.repository.ProductRepository;
 import com.enviro.assessment.junior.giftntintili.repository.WithdrawalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.format.DateTimeFormatter;
 
 import java.math.BigDecimal;
@@ -35,13 +36,18 @@ public class WithdrawalService {
     /**
      * Creates a withdrawal after validating all business rules.
      */
-    public WithdrawalResponse createWithdrawal(WithdrawalRequest request) {
+    @Transactional
+    public WithdrawalResponse createWithdrawal(WithdrawalRequest request, Long investorId) {
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Product with ID " + request.productId() + " was not found"
                         )
                 );
+
+        if (!product.getInvestor().getId().equals(investorId)) {
+            throw new ResourceNotFoundException("Product was not found for this investor");
+        }
 
         validateWithdrawal(product, request.amount());
 
@@ -101,8 +107,9 @@ public class WithdrawalService {
     /**
      * Retrieves all withdrawal records.
      */
-    public List<WithdrawalResponse> getAllWithdrawals() {
-        return withdrawalRepository.findAll()
+    @Transactional(readOnly = true)
+    public List<WithdrawalResponse> getWithdrawals(Long investorId) {
+        return withdrawalRepository.findByProductInvestorId(investorId)
                 .stream()
                 .map(withdrawal -> new WithdrawalResponse(
                         withdrawal.getId(),
@@ -118,17 +125,15 @@ public class WithdrawalService {
     /**
      * Exports withdrawals as formatted CSV text.
      *
-     * If investorId is provided, only withdrawals linked to that investor
-     * will be exported. Otherwise, all withdrawals will be exported.
+     * Exports only withdrawals belonging to the authenticated investor.
      */
+    @Transactional(readOnly = true)
     public String exportWithdrawalsToCsv(Long investorId) {
         StringBuilder csv = new StringBuilder();
 
         csv.append("Withdrawal ID,Product ID,Product Name,Amount,Withdrawal Date,Remaining Balance\n");
 
-        List<Withdrawal> withdrawals = investorId == null
-                ? withdrawalRepository.findAll()
-                : withdrawalRepository.findByProductInvestorId(investorId);
+        List<Withdrawal> withdrawals = withdrawalRepository.findByProductInvestorId(investorId);
 
         withdrawals.forEach(withdrawal -> {
             csv.append(withdrawal.getId()).append(",");

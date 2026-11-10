@@ -7,6 +7,7 @@ import com.enviro.assessment.junior.giftntintili.exception.ResourceNotFoundExcep
 import com.enviro.assessment.junior.giftntintili.repository.InvestorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class InvestorService {
      * @param investorId ID of the investor
      * @return portfolio response containing investor and product details
      */
+    @Transactional(readOnly = true)
     public PortfolioResponse getPortfolio(Long investorId) {
         Investor investor = investorRepository.findById(investorId)
                 .orElseThrow(() ->

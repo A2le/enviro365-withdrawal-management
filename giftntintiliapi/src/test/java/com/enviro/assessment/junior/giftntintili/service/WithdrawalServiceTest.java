@@ -58,7 +58,7 @@ class WithdrawalServiceTest {
 
         assertThrows(
                 BusinessRuleException.class,
-                () -> withdrawalService.createWithdrawal(request)
+                () -> withdrawalService.createWithdrawal(request, 1L)
         );
     }
 
@@ -66,6 +66,7 @@ class WithdrawalServiceTest {
     void shouldRejectWithdrawalGreaterThanBalance() {
 
         Investor investor = Investor.builder()
+                .id(1L)
                 .age(70)
                 .build();
 
@@ -87,7 +88,7 @@ class WithdrawalServiceTest {
 
         assertThrows(
                 BusinessRuleException.class,
-                () -> withdrawalService.createWithdrawal(request)
+                () -> withdrawalService.createWithdrawal(request, 1L)
         );
     }
 
@@ -95,6 +96,7 @@ class WithdrawalServiceTest {
     void shouldRejectWithdrawalGreaterThanNinetyPercent() {
 
         Investor investor = Investor.builder()
+                .id(1L)
                 .age(70)
                 .build();
 
@@ -116,7 +118,7 @@ class WithdrawalServiceTest {
 
         assertThrows(
                 BusinessRuleException.class,
-                () -> withdrawalService.createWithdrawal(request)
+                () -> withdrawalService.createWithdrawal(request, 1L)
         );
     }
 }
