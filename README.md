@@ -1,157 +1,172 @@
-# Enviro365 Withdrawal Management API
+# Enviro365 Withdrawal Management
 
-## Overview
-
-This project was developed as part of the Enviro365 Junior Developer Assessment.
-
-The application provides a RESTful API that allows investors to view their investment portfolios and submit withdrawal requests while enforcing specific business rules.
-
-The solution is built using Spring Boot, Spring Data JPA, and an in-memory H2 database.
+A full-stack investment withdrawal management system built with Spring Boot and React. Investors can view their portfolio, submit withdrawal requests, review their withdrawal history, and export records to CSV.
 
 ---
 
-## Features
+## Tech Stack
 
-### Portfolio Management
-
-* Retrieve an investor's portfolio
-* View investor information
-* View associated investment products
-* View product balances and product types
-
-### Withdrawal Processing
-
-* Submit withdrawal requests
-* Validate business rules before processing
-* Automatically update product balances
-* Store withdrawal history
-
-### Withdrawal History
-
-* Retrieve all withdrawal records
-* View withdrawal amounts, dates, and related products
-
-### CSV Export
-
-* Export all withdrawal records as a CSV file
-
-### Validation & Error Handling
-
-* Request validation using Jakarta Validation
-* Global exception handling
-* Standardized API error responses
+| Layer | Technologies |
+|---|---|
+| Backend | Java 21, Spring Boot 3.5, Spring Data JPA, Spring Security, H2 |
+| Frontend | React 19, Vite, Material UI, Axios |
+| Auth | HTTP Basic with BCrypt-hashed passwords |
 
 ---
 
-## Business Rules
+## Prerequisites
 
-The application enforces the following withdrawal rules:
+Before running the project, make sure you have the following installed:
 
-### Retirement Products
+- **Java 21** — [Download](https://adoptium.net/)
+- **Maven 3.9+** — [Download](https://maven.apache.org/download.cgi) (or use the included `mvnw` wrapper)
+- **Node.js 18+** — [Download](https://nodejs.org/)
+- **npm 9+** — bundled with Node.js
 
-Withdrawals from retirement products are only permitted when the investor is older than 65 years.
+Verify your versions:
 
-### Balance Validation
-
-A withdrawal amount cannot exceed the available product balance.
-
-### Maximum Withdrawal Limit
-
-A withdrawal amount cannot exceed 90% of the product balance.
-
----
-
-## Technology Stack
-
-### Backend
-
-* Java 21
-* Spring Boot 3.5.x
-* Spring Data JPA
-* Maven
-* Lombok
-* H2 Database
-
-### Testing
-
-* JUnit 5
-* Mockito
+```bash
+java -version
+mvn -version   # or ./mvnw -version
+node -version
+npm -version
+```
 
 ---
 
 ## Project Structure
 
-```text
-src/main/java/com.enviro.assessment.junior.giftntintili
-
-├── config
-├── controller
-├── dto
-├── entity
-├── exception
-├── repository
-└── service
 ```
-
-### Package Responsibilities
-
-| Package    | Responsibility                             |
-| ---------- | ------------------------------------------ |
-| controller | REST API endpoints                         |
-| service    | Business logic                             |
-| repository | Database access                            |
-| entity     | JPA entities                               |
-| dto        | Request and response models                |
-| exception  | Global exception handling                  |
-| config     | Application configuration and data seeding |
+enviro365-withdrawal-management/
+├── giftntintiliapi/          # Spring Boot backend (port 8080)
+└── enviro365-withdrawal-ui/  # React + Vite frontend (port 5173)
+```
 
 ---
 
-## Database
+## 1. Backend Setup
 
-The application uses an in-memory H2 database.
+### Navigate to the backend directory
 
-Sample data is automatically loaded on application startup using a CommandLineRunner.
+```bash
+cd giftntintiliapi
+```
 
-### Sample Investors
+### Run the application
 
-#### John Smith
+Using Maven wrapper (no Maven installation required):
 
-* Age: 70
-* Retirement Annuity: R500,000
-* Tax Free Savings: R150,000
+```bash
+./mvnw spring-boot:run
+```
 
-#### Mary Johnson
+Or with Maven installed globally:
 
-* Age: 45
-* Retirement Fund: R300,000
-* Money Market Savings: R80,000
+```bash
+mvn spring-boot:run
+```
+
+The API starts at `http://localhost:8080`.
+
+> The H2 database is **in-memory** — data resets every time the backend restarts. Sample investors and accounts are seeded automatically on startup.
+
+### Run tests
+
+```bash
+./mvnw test
+```
+
+---
+
+## 2. Frontend Setup
+
+### Navigate to the frontend directory
+
+```bash
+cd enviro365-withdrawal-ui
+```
+
+### Configure the environment
+
+Copy the example env file and adjust if needed:
+
+```bash
+cp .env.example .env
+```
+
+The default `.env` content:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080/api
+```
+
+Only change this if your backend runs on a different port or host.
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Start the development server
+
+```bash
+npm run dev
+```
+
+The app runs at `http://localhost:5173`.
+
+---
+
+## Demo Accounts
+
+Two investor accounts are seeded automatically when the backend starts:
+
+| Investor | Username | Password |
+|---|---|---|
+| John Smith (age 70) | `john.smith` | `John123!` |
+| Mary Johnson (age 45) | `mary.johnson` | `Mary123!` |
+
+To override the default passwords, set these environment variables **before** starting the backend:
+
+```bash
+export ENVIRO365_DEMO_JOHN_PASSWORD=YourPassword1!
+export ENVIRO365_DEMO_MARY_PASSWORD=YourPassword2!
+./mvnw spring-boot:run
+```
+
+---
+
+## Available URLs
+
+| URL | Description |
+|---|---|
+| `http://localhost:5173` | React frontend |
+| `http://localhost:8080/api` | REST API base |
+| `http://localhost:8080/swagger-ui/index.html` | API documentation (Swagger UI) |
+| `http://localhost:8080/h2-console` | H2 database console |
+
+### H2 Console connection details
+
+```
+JDBC URL:  jdbc:h2:mem:envirodb
+Username:  sa
+Password:  (leave blank)
+```
 
 ---
 
 ## API Endpoints
 
-### Get Investor Portfolio
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/auth/me` | Returns the authenticated user |
+| `GET` | `/api/investors/me/portfolio` | Returns the authenticated investor's portfolio |
+| `POST` | `/api/withdrawals` | Creates a withdrawal |
+| `GET` | `/api/withdrawals` | Lists the investor's withdrawal history |
+| `GET` | `/api/withdrawals/export` | Downloads withdrawal history as `withdrawals.csv` |
 
-```http
-GET /api/investors/{investorId}/portfolio
-```
-
-Example:
-
-```http
-GET /api/investors/1/portfolio
-```
-
----
-
-### Create Withdrawal
-
-```http
-POST /api/withdrawals
-```
-
-Request Body:
+### Withdrawal request body
 
 ```json
 {
@@ -162,133 +177,27 @@ Request Body:
 
 ---
 
-### Get Withdrawal History
+## Business Rules
 
-```http
-GET /api/withdrawals
-```
-
----
-
-### Export Withdrawals
-
-```http
-GET /api/withdrawals/export
-```
-
-Downloads:
-
-```text
-withdrawals.csv
-```
+| Rule | Detail |
+|---|---|
+| Retirement age restriction | Withdrawals from retirement products are only allowed when the investor is older than 65 |
+| Balance limit | Withdrawal amount cannot exceed the available product balance |
+| Maximum withdrawal | Withdrawal amount cannot exceed 90% of the product balance |
 
 ---
 
-## Running the Application
+## Authentication & Data Isolation
 
-### Prerequisites
+- All API routes require HTTP Basic authentication.
+- Each investor only sees their own portfolio, withdrawals, and CSV export.
+- The frontend holds credentials in memory only — refreshing the page requires signing in again. Nothing is written to `localStorage` or `sessionStorage`.
+- Withdrawal creation verifies that the selected product belongs to the authenticated investor.
 
-* Java 21
-* Maven 3.9+
-
-### Clone Repository
-
-```bash
-git clone <repository-url>
-```
-
-### Navigate to Project
-
-```bash
-cd giftntintiliapi
-```
-
-### Run Application
-
-```bash
-mvn spring-boot:run
-```
-
-Application starts on:
-
-```text
-http://localhost:8080
-```
-
----
-
-## H2 Database Console
-
-URL:
-
-```text
-http://localhost:8080/h2-console
-```
-
-Connection Details:
-
-```text
-JDBC URL:
-jdbc:h2:mem:envirodb
-
-Username:
-sa
-
-Password:
-(blank)
-```
-swagger url
-
-```text
-http://localhost:8080/swagger-ui/index.html
-```
----
-
-## Running Tests
-
-```bash
-mvn test
-```
-
-The test suite validates:
-
-* Retirement age restrictions
-* Balance validation
-* Maximum withdrawal limits
-* Withdrawal processing logic
-
----
-
-## Design Decisions
-
-### Layered Architecture
-
-The application follows a layered architecture:
-
-```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-Database
-```
-
-This separation improves maintainability, testability, and readability.
-
-### DTO Pattern
-
-DTOs are used to separate API contracts from persistence models and prevent direct exposure of entities.
-
-### Global Exception Handling
-
-A centralized exception handling mechanism provides consistent and user-friendly error responses.
+> **Security note:** HTTP Basic must only be used over HTTPS outside local development. The demo passwords are for local assessment/testing only. Replace them before any deployment.
 
 ---
 
 ## Author
 
-Athule Gift
-
-Enviro365 Junior Developer Assessment Submission
+Athule Gift — Enviro365 Junior Developer Assessment
